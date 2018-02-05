@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://www.gstatic.com/firebasejs/4.9.1/firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.9.0/firebase-database.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/2.5.1/firebaseui.css" />
+    <title>Document</title>
+    <script>
+        window.onload = function(){
+            var config = {
+                apiKey: "AIzaSyDhU0N1pqMfQxWuBsFZswmsyZavjf-c9FA",
+                authDomain: "jsfirebaseapp.firebaseapp.com",
+                databaseURL: "https://jsfirebaseapp.firebaseio.com",
+                projectId: "jsfirebaseapp",
+                storageBucket: "jsfirebaseapp.appspot.com",
+                messagingSenderId: "586775948754"
+                };
+            firebase.initializeApp(config);
+            database = firebase.database()
+            reference = database.ref('users')
+            authentication = firebase.auth()
+            let myUser = null
+
+    
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    //window.location = "welcome.html";
+                    console.log('you are here')
+                    myUser = authentication.currentUser
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            //var user = firebase.auth().currentUser
+            //console.log('User ' + firebase.auth().currentUser.uid)
+            safeFieldData = function(){
+                reference.child(myUser.uid).set({
+                    data: document.getElementById("myText").value
+                });
+                //console.log("User id " + myUser.uid + " *** text: " + document.getElementById("myText").value)
+            }
+    
+            signOutAction = function(){
+                firebase.auth().signOut().then(function() {
+                // Sign-out successful.
+                window.location.href = 'index.html';
+                }).catch(function(error) {
+                // An error happened.
+                alert('Error. Try again')
+                });
+            }
+
+            displayData = function(){
+                firebase.database().ref('users/' + myUser.uid).once('value').then(function(snapshot) {
+                    console.log(snapshot.val())
+                    document.getElementById('myData').innerHTML = snapshot.val().data
+                });
+            }
+
+            showData = function(){
+                displayData()
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Welcome</h1>
+
+    <button onclick = "signOutAction()">Logout</button>
+    <label>Some info to save:</label>
+    <input type="text" id="myText" />
+    <input type="button" onclick="safeFieldData()" value="Save data"/>
+    <input type="button" onclick="showData()" value="Show data" />
+    <br/>
+    <br/>
+    <h1 id="myData"></h1>
+</body>
+</html>
